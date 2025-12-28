@@ -14,6 +14,7 @@ button { margin-top: 8px; padding: 6px 12px; }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .task-delete { cursor: pointer; color: gray; }
 .task-delete:hover { color: black; }
+hr { margin: 20px 0; }
 </style>
 </head>
 <body>
@@ -22,11 +23,11 @@ button { margin-top: 8px; padding: 6px 12px; }
 
 <div class="grid">
   <div>
-    <h2 class="groupA">グループA（最大10人）</h2>
+    <h2 class="groupA">グループA（最大6人）</h2>
     <div id="groupAInputs"></div>
   </div>
   <div>
-    <h2 class="groupB">グループB（最大10人）</h2>
+    <h2 class="groupB">グループB（最大6人）</h2>
     <div id="groupBInputs"></div>
   </div>
 </div>
@@ -51,11 +52,38 @@ button { margin-top: 8px; padding: 6px 12px; }
 <div class="result" id="result"></div>
 
 <script>
-// ===== 初期タスク =====
+// ===== 初期タスク（txt反映・全30件）=====
 let tasks = [
   "前進キー外す",
+  "マウスの右クリ左クリ反転",
+  "１タップ縛り",
+  "撃ち合ってない時ずっと武器を見る",
+  "クロスヘア非表示",
+  "歩き禁止(しゃがみ移動はあり、遅いからどうせ飽きる)",
+  "スナイパー専(ピストルはクラシック)",
+  "ガーディアンとブルドック縛り(サブ武器は自由)",
+  "ヘビーアーマー禁止",
+  "メイン武器アレスのみ",
   "ADS禁止",
-  "ヘビーアーマー禁止"
+  "しゃがみキー外す",
+  "全ラウンドスキル優先でバイする",
+  "毎ラウンドショーティーを持っていく",
+  "リロードキーを外す",
+  "1キル発生まで発砲禁止",
+  "ウルトを溜まった瞬間あるいはラウンド開始時に使用する",
+  "ラウンド開始後10秒手を放す",
+  "攻めの時はボムを持つ、守りの時は解除をする(そのためなら妨害してもいい)",
+  "メインボリュームを0にする",
+  "使用キャラなりきり",
+  "自分の考えてることしゃべり続ける",
+  "フラグトップの近くにずっといる",
+  "死んだら味方をほめまくる",
+  "定期的に嘘を言う",
+  "味方チームが残り一人になったら話しかける",
+  "語尾「でやんす」",
+  "一人称を「おいどん」にする",
+  "敬語禁止",
+  "FPSを60にする"
 ];
 
 // ===== 状態 =====
@@ -66,13 +94,13 @@ let taskOn = true;
 // ===== 共通 =====
 const shuffle = arr => arr.slice().sort(() => Math.random() - 0.5);
 
-// ===== 名前入力生成 =====
+// ===== 名前入力生成（6枠）=====
 function renderNameInputs() {
   const a = document.getElementById("groupAInputs");
   const b = document.getElementById("groupBInputs");
   a.innerHTML = b.innerHTML = "";
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 6; i++) {
     a.appendChild(createNameInput());
     b.appendChild(createNameInput());
   }
@@ -173,3 +201,4 @@ renderTasks();
 
 </body>
 </html>
+
