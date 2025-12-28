@@ -2,86 +2,114 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>ランダム抽出ツール</title>
+<title>ランダムタスク割り当て（Step A）</title>
 <style>
-body { font-family: sans-serif; margin: 20px; }
-button { padding: 8px 16px; margin-top: 10px; }
-#result { margin-top: 20px; white-space: pre-line; }
+body {
+  font-family: sans-serif;
+  margin: 20px;
+}
+
+textarea, input {
+  width: 100%;
+  margin-top: 5px;
+}
+
+button {
+  margin-top: 8px;
+  padding: 6px 12px;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.task-list {
+  margin-top: 10px;
+}
 </style>
 </head>
 <body>
 
-<h1>ランダム抽出ツール</h1>
-<p>抽出個数を入力して「実行」ボタンを押してください。</p>
+<h1>ランダムタスク割り当て（Step A）</h1>
 
-<input type="number" id="count" min="1" placeholder="抽出個数">
-<button onclick="runRandom()">実行</button>
+<!-- 名前入力 -->
+<h2>① 名前入力（改行区切り）</h2>
+<textarea id="names" rows="5" placeholder="ミルクレープ
+たろう
+はなこ"></textarea>
 
-<div id="result"></div>
+<!-- タスク管理 -->
+<h2>② タスク管理</h2>
+
+<!-- タスク追加 -->
+<input type="text" id="newTask" placeholder="新しいタスクを入力">
+<button onclick="addTask()">タスク追加</button>
+
+<!-- タスク一覧 -->
+<div class="task-list" id="taskList"></div>
+
+<!-- 実行（仮） -->
+<h2>③ 仮実行（確認用）</h2>
+<button onclick="run()">有効タスクを確認</button>
+
+<pre id="result"></pre>
 
 <script>
-// データ（message.txt の中身）
-const data = [
-"前進キー外す",
-"マウスの右クリ左クリ反転",
-"１タップ縛り",
-"撃ち合ってない時ずっと武器を見る",
-"クロスヘア非表示",
-"歩き禁止(しゃがみ移動はあり)",
-"スナイパー専(ピストルはクラシック)",
-"ガーディアンとブルドック縛り(サブ武器は自由)",
-"ヘビーアーマー禁止",
-"メイン武器アレスのみ",
-"ADS禁止",
-"しゃがみキー外す",
-"全ラウンドスキル優先でバイする",
-"毎ラウンドショーティーを持っていく",
-"リロードキーを外す",
-"1キル発生まで発砲禁止",
-"ウルトを溜まった瞬間あるいはラウンド開始時に使用する",
-"ラウンド開始後10秒手を放す",
-"攻めの時はボムを持つ、守りの時は解除をする(そのためなら妨害してもいい)",
-"メインボリュームを0にする",
-"使用キャラなりきり",
-"自分の考えてることしゃべり続ける",
-"フラグトップの近くにずっといる",
-"死んだら味方をほめまくる",
-"定期的に嘘を言う",
-"味方チームが残り一人になったら話しかける",
-"語尾「でやんす」",
-"一人称を「おいどん」にする",
-"敬語禁止",
-"FPSを60にする"
+// ===== タスクデータ（チェック式） =====
+let tasks = [
+  { text: "前進キー外す", enabled: true },
+  { text: "マウスの右クリ左クリ反転", enabled: true },
+  { text: "ADS禁止", enabled: true },
+  { text: "ヘビーアーマー禁止", enabled: false }
 ];
 
-function runRandom() {
-    let count = parseInt(document.getElementById('count').value, 10);
-    if (isNaN(count) || count <= 0) {
-        alert("正しい抽出個数を入力してください");
-        return;
-    }
-    if (count > data.length) {
-        alert("抽出個数がデータ数を超えています");
-        return;
-    }
+// ===== タスク一覧描画 =====
+function renderTasks() {
+  const list = document.getElementById("taskList");
+  list.innerHTML = "";
 
-    // シャッフル
-    let shuffled = [...data].sort(() => Math.random() - 0.5);
+  tasks.forEach((task, index) => {
+    const div = document.createElement("div");
+    div.className = "task-item";
 
-    // 個数分だけ抽出
-    let selected = shuffled.slice(0, count);
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = task.enabled;
+    checkbox.onchange = () => {
+      tasks[index].enabled = checkbox.checked;
+    };
 
-    // 半分に分ける
-    let half = Math.floor(count / 2);
-    let group1 = selected.slice(0, half);
-    let group2 = selected.slice(half);
+    const label = document.createElement("span");
+    label.textContent = task.text;
 
-    // 結果表示
-    let output = "【前半】\n" + group1.join("\n") +
-                 "\n\n【後半】\n" + group2.join("\n");
-
-    document.getElementById('result').textContent = output;
+    div.appendChild(checkbox);
+    div.appendChild(label);
+    list.appendChild(div);
+  });
 }
+
+// ===== タスク追加 =====
+function addTask() {
+  const input = document.getElementById("newTask");
+  const text = input.value.trim();
+  if (text === "") return;
+
+  tasks.push({ text: text, enabled: true });
+  input.value = "";
+  renderTasks();
+}
+
+// ===== 仮実行（確認用） =====
+function run() {
+  const activeTasks = tasks.filter(t => t.enabled).map(t => t.text);
+  document.getElementById("result").textContent =
+    "現在有効なタスク：\n" + activeTasks.join("\n");
+}
+
+// 初期表示
+renderTasks();
 </script>
 
 </body>
