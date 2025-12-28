@@ -2,55 +2,35 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>ランダムタスク割り当て（Step B）</title>
+<title>ランダムタスク割り当て</title>
 <style>
-body {
-  font-family: sans-serif;
-  margin: 20px;
-}
-
-textarea, input {
-  width: 100%;
-  margin-top: 5px;
-}
-
-button {
-  margin-top: 8px;
-  padding: 6px 12px;
-}
-
-.task-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.task-list {
-  margin-top: 10px;
-}
-
+body { font-family: sans-serif; margin: 20px; }
+textarea, input { width: 100%; margin-top: 6px; }
+button { margin-top: 8px; padding: 6px 14px; }
+.task-item { margin-top: 4px; }
 .groupA { color: red; }
 .groupB { color: blue; }
-
-.result {
-  white-space: pre-line;
-  margin-top: 15px;
-}
+.result { white-space: pre-line; margin-top: 15px; }
+hr { margin: 20px 0; }
 </style>
 </head>
 <body>
 
-<h1>ランダムタスク割り当て（Step B）</h1>
+<h1>ランダムタスク割り当て</h1>
 
-<h2>① 名前入力（改行区切り・最大10人）</h2>
+<h2>① 名前（改行区切り・最大10人）</h2>
 <textarea id="names" rows="5"></textarea>
 
-<h2>② タスク管理</h2>
-<input type="text" id="newTask" placeholder="新しいタスクを入力">
-<button onclick="addTask()">タスク追加</button>
-<div class="task-list" id="taskList"></div>
+<hr>
 
-<h2>③ 実行設定</h2>
+<h2>② タスク管理</h2>
+<input id="newTask" placeholder="新しいタスクを入力">
+<button onclick="addTask()">タスク追加</button>
+<div id="taskList"></div>
+
+<hr>
+
+<h2>③ 実行</h2>
 <label>
   <input type="checkbox" id="taskOn" checked>
   タスクを付与する
@@ -62,41 +42,29 @@ button {
 <div class="result" id="result"></div>
 
 <script>
-// ===== タスクデータ =====
+// ===== タスク（全て常に有効）=====
 let tasks = [
-  { text: "前進キー外す", enabled: true },
-  { text: "ADS禁止", enabled: true },
-  { text: "ヘビーアーマー禁止", enabled: false }
+  "前進キー外す",
+  "ADS禁止",
+  "ヘビーアーマー禁止"
 ];
 
-// ===== 状態保持 =====
-let lastGroupA = [];
-let lastGroupB = [];
-let lastTaskOn = true;
+// ===== 状態 =====
+let groupA = [];
+let groupB = [];
+let taskOn = true;
 
 // ===== 共通 =====
-function shuffle(arr) {
-  return arr.slice().sort(() => Math.random() - 0.5);
-}
+const shuffle = arr => arr.slice().sort(() => Math.random() - 0.5);
 
 // ===== タスクUI =====
 function renderTasks() {
   const list = document.getElementById("taskList");
   list.innerHTML = "";
-  tasks.forEach((task, i) => {
+  tasks.forEach(t => {
     const div = document.createElement("div");
     div.className = "task-item";
-
-    const cb = document.createElement("input");
-    cb.type = "checkbox";
-    cb.checked = task.enabled;
-    cb.onchange = () => tasks[i].enabled = cb.checked;
-
-    const span = document.createElement("span");
-    span.textContent = task.text;
-
-    div.appendChild(cb);
-    div.appendChild(span);
+    div.textContent = "・" + t;
     list.appendChild(div);
   });
 }
@@ -104,7 +72,7 @@ function renderTasks() {
 function addTask() {
   const input = document.getElementById("newTask");
   if (!input.value.trim()) return;
-  tasks.push({ text: input.value.trim(), enabled: true });
+  tasks.push(input.value.trim());
   input.value = "";
   renderTasks();
 }
@@ -119,58 +87,48 @@ function run() {
     return;
   }
 
-  lastTaskOn = document.getElementById("taskOn").checked;
+  taskOn = document.getElementById("taskOn").checked;
 
   const shuffled = shuffle(names);
-  lastGroupA = shuffled.slice(0, 5);
-  lastGroupB = shuffled.slice(5, 10);
+  groupA = shuffled.slice(0, 5);
+  groupB = shuffled.slice(5, 10);
 
-  assignTasks();
+  assign();
 }
 
 // ===== 再抽選 =====
 function reroll() {
-  if (lastGroupA.length === 0 && lastGroupB.length === 0) {
+  if (groupA.length === 0 && groupB.length === 0) {
     alert("先に実行してください");
     return;
   }
-  assignTasks();
+  assign();
 }
 
-// ===== タスク割り当て =====
-function assignTasks() {
-  const activeTasks = shuffle(
-    tasks.filter(t => t.enabled).map(t => t.text)
-  );
+// ===== 割り当て =====
+function assign() {
+  const shuffledTasks = shuffle(tasks);
 
-  if (lastTaskOn && activeTasks.length < lastGroupA.length + lastGroupB.length) {
-    alert("有効なタスク数が足りません");
+  if (taskOn && shuffledTasks.length < groupA.length + groupB.length) {
+    alert("タスク数が足りません");
     return;
   }
 
-  let index = 0;
-  let html = "";
-
-  html += `<div class="groupA">【グループA】\n`;
-  lastGroupA.forEach(name => {
-    html += name;
-    if (lastTaskOn) html += " ： " + activeTasks[index++];
-    html += "\n";
+  let i = 0;
+  let html = `<div class="groupA">【グループA】\n`;
+  groupA.forEach(n => {
+    html += n + (taskOn ? " ： " + shuffledTasks[i++] : "") + "\n";
   });
-  html += `</div>\n`;
-
-  html += `<div class="groupB">【グループB】\n`;
-  lastGroupB.forEach(name => {
-    html += name;
-    if (lastTaskOn) html += " ： " + activeTasks[index++];
-    html += "\n";
+  html += `</div>\n<div class="groupB">【グループB】\n`;
+  groupB.forEach(n => {
+    html += n + (taskOn ? " ： " + shuffledTasks[i++] : "") + "\n";
   });
-  html += `</div>`;
+  html += "</div>";
 
   document.getElementById("result").innerHTML = html;
 }
 
-// 初期描画
+// 初期化
 renderTasks();
 </script>
 
