@@ -35,9 +35,13 @@ hr { margin: 20px 0; }
 <hr>
 
 <h2>タスク管理</h2>
-<input id="newTask" placeholder="新しいタスクを入力">
-<button onclick="addTask()">タスク追加</button>
-<div id="taskList"></div>
+<button onclick="toggleTasks()" id="toggleBtn">タスク一覧を非表示</button>
+
+<div id="taskSection">
+  <input id="newTask" placeholder="新しいタスクを入力">
+  <button onclick="addTask()">タスク追加</button>
+  <div id="taskList"></div>
+</div>
 
 <hr>
 
@@ -52,30 +56,30 @@ hr { margin: 20px 0; }
 <div class="result" id="result"></div>
 
 <script>
-// ===== 初期タスク（txt反映・全30件）=====
+// ===== 初期タスク =====
 let tasks = [
   "前進キー外す",
   "マウスの右クリ左クリ反転",
-  "１タップ縛り",
-  "撃ち合ってない時ずっと武器を見る",
+  "シェリフ・ガーディアン縛り",
+  "武器一個のみ所持可能",
   "クロスヘア非表示",
-  "歩き禁止(しゃがみ移動はあり、遅いからどうせ飽きる)",
+  "歩き禁止(しゃがみ移動はあり)",
   "スナイパー専(ピストルはクラシック)",
   "ガーディアンとブルドック縛り(サブ武器は自由)",
   "ヘビーアーマー禁止",
   "メイン武器アレスのみ",
-  "ADS禁止",
-  "しゃがみキー外す",
-  "全ラウンドスキル優先でバイする",
-  "毎ラウンドショーティーを持っていく",
-  "リロードキーを外す",
-  "1キル発生まで発砲禁止",
-  "ウルトを溜まった瞬間あるいはラウンド開始時に使用する",
-  "ラウンド開始後10秒手を放す",
-  "攻めの時はボムを持つ、守りの時は解除をする(そのためなら妨害してもいい)",
-  "メインボリュームを0にする",
+  "ADS禁止（スコープも禁止）",
+  "スキルとシールド以外にお金使っちゃダメ！",
+  "一番左のスキルしか使えない",
+  "毎ラウンドショーティーを必ず買う",
+  "リロードのキーバインドを外す",
+  "感度を誕生日にする（1/10なら0.110）",
+  "思考放棄！アホになる！",
+  "スキルをすべて正式名称で言う",
+  "拾える限りの効果音をすべて口に出す",
+  "関西弁縛り",
   "使用キャラなりきり",
-  "自分の考えてることしゃべり続ける",
+  "死んでる間バブる",
   "フラグトップの近くにずっといる",
   "死んだら味方をほめまくる",
   "定期的に嘘を言う",
@@ -83,33 +87,43 @@ let tasks = [
   "語尾「でやんす」",
   "一人称を「おいどん」にする",
   "敬語禁止",
-  "FPSを60にする"
+  "語尾を「にょん」"
+  "一人称を「あちき」にする"
+  "死んだら実況する"
 ];
 
 // ===== 状態 =====
 let groupA = [];
 let groupB = [];
 let taskOn = true;
+let taskVisible = true;
 
 // ===== 共通 =====
 const shuffle = arr => arr.slice().sort(() => Math.random() - 0.5);
 
-// ===== 名前入力生成（6枠）=====
+// ===== 名前入力 =====
 function renderNameInputs() {
   const a = document.getElementById("groupAInputs");
   const b = document.getElementById("groupBInputs");
   a.innerHTML = b.innerHTML = "";
-
   for (let i = 0; i < 6; i++) {
     a.appendChild(createNameInput());
     b.appendChild(createNameInput());
   }
 }
-
 function createNameInput() {
   const input = document.createElement("input");
   input.placeholder = "名前";
   return input;
+}
+
+// ===== タスク表示切替 =====
+function toggleTasks() {
+  taskVisible = !taskVisible;
+  document.getElementById("taskSection").style.display =
+    taskVisible ? "block" : "none";
+  document.getElementById("toggleBtn").textContent =
+    taskVisible ? "タスク一覧を非表示" : "タスク一覧を表示";
 }
 
 // ===== タスクUI =====
@@ -173,7 +187,6 @@ function reroll() {
 // ===== 割り当て =====
 function assign() {
   const shuffledTasks = shuffle(tasks);
-
   if (taskOn && shuffledTasks.length < groupA.length + groupB.length) {
     alert("タスク数が足りません");
     return;
@@ -184,7 +197,6 @@ function assign() {
   groupA.forEach(n => {
     html += n + (taskOn ? " ： " + shuffledTasks[i++] : "") + "\n";
   });
-
   html += `</div>\n<div class="groupB">【グループB】\n`;
   groupB.forEach(n => {
     html += n + (taskOn ? " ： " + shuffledTasks[i++] : "") + "\n";
@@ -201,4 +213,3 @@ renderTasks();
 
 </body>
 </html>
-
